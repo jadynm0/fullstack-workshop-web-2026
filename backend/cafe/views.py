@@ -8,7 +8,7 @@ from .models import MenuItem, Order
 
 # Temporary workshop storage. Mission 7 replaces this with the database.
 temporary_menu = [
-    {"id": 1, "name": "Iced Matcha", "price": "6.00", "available": True},
+    {"id": 1, "name": "Matcha", "price": "6.00", "available": True},
     {"id": 2, "name": "Latte", "price": "5.00", "available": True},
     {"id": 3, "name": "Americano", "price": "4.00", "available": True},
     {"id": 4, "name": "Chai Latte", "price": "5.50", "available": True},
@@ -58,9 +58,8 @@ def menu_list(request):
     if request.method != "GET":
         return JsonResponse({"error": "method not allowed"}, status=405)
 
-    # TODO-WORKSHOP-2
     # Return the temporary menu as JSON:
-    # return JsonResponse(temporary_menu, safe=False)
+    return JsonResponse(temporary_menu, safe=False)
 
     # TODO-WORKSHOP-7
     # Replace temporary_menu with the database:
@@ -113,22 +112,21 @@ def create_order(request):
     if quantity < 1:
         return JsonResponse({"error": "quantity must be a positive integer"}, status=400)
 
-    # TODO-WORKSHOP-3
-    # menu_item = next((item for item in temporary_menu if item["id"] == menu_item_id), None)
-    # if menu_item is None:
-    #     return JsonResponse({"error": "menu item not found"}, status=400)
-    # blocked = reject_if_unavailable(menu_item)
-    # if blocked is not None:
-    #     return blocked
-    # order = {
-    #     "id": len(temporary_orders) + 1,
-    #     "customer_name": customer_name,
-    #     "menu_item": dict(menu_item),
-    #     "quantity": quantity,
-    #     "status": "pending",
-    # }
-    # temporary_orders.append(order)
-    # return JsonResponse(order, status=201)
+    menu_item = next((item for item in temporary_menu if item["id"] == menu_item_id), None)
+    if menu_item is None:
+        return JsonResponse({"error": "menu item not found"}, status=400)
+    blocked = reject_if_unavailable(menu_item)
+    if blocked is not None:
+        return blocked
+    order = {
+        "id": len(temporary_orders) + 1,
+        "customer_name": customer_name,
+        "menu_item": dict(menu_item),
+        "quantity": quantity,
+        "status": "pending",
+    }
+    temporary_orders.append(order)
+    return JsonResponse(order, status=201)
 
     # TODO-WORKSHOP-7
     # menu_item = MenuItem.objects.filter(id=menu_item_id).first()
